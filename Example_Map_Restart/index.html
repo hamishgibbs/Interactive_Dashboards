@@ -1,0 +1,58 @@
+<html>
+<!-- HTML Header -->
+<head>
+  <title>Interactive Dashboard Example</title>
+  
+  <!-- link to Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+  
+  <!-- link to Leaflet.js -->
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+   crossorigin=""></script>
+  
+  <!-- link to jquery.js for importing .geojson data -->
+  <script src="jquery-3.4.1.min.js"></script>
+  
+  <!-- link to chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
+  <!-- Style map height -->
+  <style type="text/css">
+    #main_map{ height: 100% }
+  </style>
+</head>
+<!-- Website Content -->
+<body>
+
+  <!-- Style absolute panel holding chart -->
+  <style>
+    .chart-container {
+      height: 300px;
+      width: 600px;
+    }
+
+    #info-pane {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 400;
+      padding: 1em;
+      background: white;
+    }
+    </style>
+
+  <!-- <div> holding map -->
+  <div id="main_map"></div>
+
+  <!-- Add chart to absolute panel -->
+  <div id="info-pane" class="leaflet-bar chart-container">
+    <canvas id="chartCanvas"></canvas>
+  </div>
+
+  <!-- import javascript from separate file -->
+  <script src="index.js"></script>
+</body>
+</html>

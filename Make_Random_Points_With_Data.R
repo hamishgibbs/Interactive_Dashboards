@@ -5,11 +5,11 @@ library(rgdal)
 library(geojson)
 library(geojsonio)
 
-z = shapefile('H:/Projects/Interactive_Dashboards/Javascript_HTML/Example_Map/gadm36_ZWE_shp/gadm36_ZWE_2.shp')
+z = shapefile('/Users/hamishgibbs/Downloads/gadm36_ZWE_shp/gadm36_ZWE_2.shp')
 
 for(i in 1:length(z)){
   poly = z[i,]
-  points = spsample(poly, runif(1, 10, 50), 'random')
+  points = spsample(poly, runif(1, 1, 10), 'random')
   if (i == 1){
     all_points = points
   }else(all_points = rbind(all_points, points))
@@ -30,6 +30,7 @@ for(i in seq_along(points$CASES)){
   points$CASES_COUNT_CLASS[i] = findInterval(points$CASES[i], classes$brks)
 }
 
+shapefile(points, '/Users/hamishgibbs/Documents/LSHTM/Interactive_Dashboard_Data/Z_Points.shp')
 
 points@data
 
