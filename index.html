@@ -1,0 +1,115 @@
+<html>
+<!-- HTML Header -->
+<head>
+  <title>Leaflet Example Map</title>
+  
+  <!-- link to Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+  
+  <!-- link to Leaflet.js -->
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+   crossorigin=""></script>
+  
+  <!-- link to jquery.js for importing .geojson data -->
+  <script src="jquery-3.4.1.min.js"></script>
+  
+  <!-- link to chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
+  <!-- Style map height -->
+  <style type="text/css">
+    #main_map{ height: 100% }
+  </style>
+</head>
+
+<!-- Website Content -->
+<body>
+
+	<!-- Style panel holding chart -->
+	<style>
+	  .chart-container {
+	    height: 245px;
+	    width: 245px;
+	  }
+
+	  #info-pane {
+	    position: absolute;
+	    top: 10px;
+	    right: 10px;
+	    z-index: 400;
+	    padding: 1em;
+	    background: white;
+	  }
+  	</style>
+
+  <!-- <div> holding map -->
+  <div id="main_map"></div>
+
+  <!-- Add chart to absolute panel -->
+  <div id="info-pane" class="leaflet-bar chart-container">
+  	<canvas id="chartCanvas"></canvas>
+  </div>
+
+  <!-- Javascript to add tiles and data to leaflet map -->
+  <script type="text/javascript">
+  
+//figure out how to read geojson, then add points
+
+var main_map = L.map('main_map').setView([-19.196521, 29.925063], 7);
+
+  //load a tile layer
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA', {
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+  maxZoom: 18,
+  id: 'mapbox/streets-v11',
+  accessToken: 'pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA'
+}).addTo(main_map);
+
+//style the point markers
+var geojsonMarkerOptions = {
+  radius: 2,
+  fillColor: "#000000",
+  color: "#000",
+  weight: 1,
+  opacity: 1,
+  fillOpacity: 0.8
+};
+
+//add data - this is working
+var points = $.ajax({
+ url:"Zimbabwe_Synthetic_Data.geojson",
+ dataType: "json",
+ success: console.log("Data successfully loaded!"),
+ error: function (xhr) {
+    alert(xhr.statusText)
+ }
+})
+//WHEN POINT DATA HAS BEEN LOADED, then add points to the map
+//there is an error here from jquery
+$.when(points).done(function() {
+			console.log(points.responseJSON);
+			
+			//add points and style them
+			var z_points = L.geoJSON(points.responseJSON, {
+				pointToLayer: function (feature, latlng) {
+        			return L.circleMarker(latlng, geojsonMarkerOptions);
+				}
+			}).addTo(main_map);
+});
+
+  //https://esri.github.io/esri-leaflet/examples/dynamic-chart.html
+  //https://leafletjs.com/examples/geojson/
+  //https://maptimeboston.github.io/leaflet-intro/
+
+  //next steps: add markers from goejson
+  //add chart 
+  //tie chart into map
+  //tie map into chart
+
+  </script>
+
+</body>
+</html>
