@@ -1,3 +1,4 @@
+<!-- INSPECT DIFFERENCE BETWEEN RODENT DATA AND ZIMBABWE DATA - POINTS? -->
 <html>
 <!-- HTML Header -->
 <head>
@@ -78,6 +79,14 @@ var geojsonMarkerOptions = {
   fillOpacity: 0.8
 };
 
+//MAY BE AN ISSUE WITH THE ZIMBABWE DATA
+
+$.getJSON("rodents.geojson",function(data){
+  // add GeoJSON layer to the map once the file is loaded
+  L.geoJson(data).addTo(main_map);
+});
+/*
+
 //add data - this is working
 var points = $.ajax({
  url:"Zimbabwe_Synthetic_Data.geojson",
@@ -87,19 +96,21 @@ var points = $.ajax({
     alert(xhr.statusText)
  }
 })
+
+
 //WHEN POINT DATA HAS BEEN LOADED, then add points to the map
 //there is an error here from jquery
 $.when(points).done(function() {
-			console.log(points.responseJSON);
-			
-			//add points and style them
-			var z_points = L.geoJSON(points.responseJSON, {
-				pointToLayer: function (feature, latlng) {
-        			return L.circleMarker(latlng, geojsonMarkerOptions);
-				}
-			}).addTo(main_map);
-});
+	console.log(points.responseJSON)
 
+		//console.log(points.responseJSON.features);
+					//add points and style them
+
+		//error handling still isnt very good - couldn't get 
+	var z_points = L.geoJSON(points.responseJSON).addTo(main_map);
+});
+*/
+  //https://github.com/calvinmetcalf/leaflet-ajax
   //https://esri.github.io/esri-leaflet/examples/dynamic-chart.html
   //https://leafletjs.com/examples/geojson/
   //https://maptimeboston.github.io/leaflet-intro/
