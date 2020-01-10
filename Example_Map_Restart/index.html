@@ -3,25 +3,22 @@
 <head>
   <title>Interactive Dashboard Example</title>
   
-  <!-- link to Leaflet CSS -->
+  <!-- link to Leaflet CSS through Content Delivery Network -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
    crossorigin=""/>
   
-  <!-- link to Leaflet.js -->
+  <!-- link to Leaflet.js through Content Delivery Network -->
   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
    crossorigin=""></script>
   
-  <!-- link to jquery.js for importing .geojson data -->
+  <!-- link to jquery.js file for importing .geojson data -->
   <script src="jquery-3.4.1.min.js"></script>
   
-  <!-- link to chart.js -->
+  <!-- link to chart.js through Content Delivery Network -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-
-  <script src="leaflet-list-markers.js"></script>
-  <link rel="stylesheet" href="leaflet-list-markers.css">
-
+  
   <!-- Style map height -->
   <style type="text/css">
     #main_map{ height: 100% }
@@ -52,6 +49,7 @@
 
   <!-- Add chart to absolute panel -->
   <div id="info-pane" class="leaflet-bar chart-container">
+    <!-- this is making a javascrip variable named chartCanvas that is accessible in the .js file -->
     <canvas id="chartCanvas"></canvas>
   </div>
     <!-- import javascript from separate file -->

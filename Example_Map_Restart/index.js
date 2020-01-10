@@ -8,6 +8,15 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: 'pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA'
 }).addTo(main_map);
 
+//define function to update chart data
+function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    chart.update();
+}
+
 var pointMarkerOptions = {
     radius: 2,
     fillColor: "#000000",
@@ -17,64 +26,91 @@ var pointMarkerOptions = {
     fillOpacity: 1
 };
 
-//var markersLayer = L.LayerGroup();
-//main_map.addLayer(markersLayer);
-
 //get json from file
 var points = $.getJSON("Z_Points.geojson")
 
 //when data is loaded
 $.when(points).done(function(){
 	
-	//defin variable containing json point data
+	//define variable containing json point data
 	var points_json = points.responseJSON
 	
 	//load json point data into the map
 	L.geoJson(points_json, {
+		//style point data using pointMarkerOptions
 		pointToLayer: function(feature, latlng) {
 			return L.circleMarker(latlng, pointMarkerOptions);
 		}
 	}).addTo(main_map);
 
-	//console.log(points_json)
+	//add the chart with all point data plotted
+	//load chartCanvas variable from the .html docuent
+	var ctx = chartCanvas.getContext('2d');
+	
+	var init_data = points_json.features.map(function(e) {
+		return {x: e.properties.CASES, y: e.properties.DEATHS}
+	});
+
+	var scatterChartData = {
+		datasets: [{
+			label: 'Scatter Plot Data',
+			data: init_data
+		}]
+	};
+
+	console.log(init_data)
+	var config = {
+	   type: 'scatter',
+	   data: scatterChartData
+	};
+
+	var scatter_plot = new Chart(ctx, config);
+
+	//define the number of ms to wait before executing code - this is not working currently (may be slowing things down)
 	var delayInMilliseconds = 100;
 
+	//when the main map is zoomed or moved
 	main_map.on('zoom move', function() {
-			//this is changing every little move of the map 
-			console.log('zoomed moved') 			
+
+			//this is changing every little move of the map 			
 			var map_bounds = main_map.getBounds();
 			
 			//this timeout doesnt seem to be doing anything
 			setTimeout(function() {
-					//console.log(map_bounds._southWest);
-					//console.log(map_bounds._northEast);
+
+					//define varibales to hold the N, S, E, W extents of the map
 					var map_bounds_north = map_bounds._northEast.lat
 					var map_bounds_east = map_bounds._northEast.lng
 					var map_bounds_south = map_bounds._southWest.lat
 					var map_bounds_west = map_bounds._southWest.lng
-					//console.log(map_bounds_north, map_bounds_east, map_bounds_south, map_bounds_west)
-					//TRY FILTERING THE DATA TO BE WITHIN MAP BOUND
 
+					//filter chart data for only points within the map bounds
 					var plot_data = [];
 
+					//for every feature in the JSON point data
 					for(var i in points_json.features) {
 						//console.log(points_json.features[i].geometry.coordinates)
-						//if latitude is less than map_bounds_north AND more
+						//if latitude is less than map_bounds_north AND latitude is more
 						// than map_bounds_south AND longitude is less than
-						// map_bounds_east AND more than map_bounds_west (ie- it is within view):
-						//check this to make sure proper points are included
+						// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
 						if ((points_json.features[i].geometry.coordinates[1] < map_bounds_north && points_json.features[i].geometry.coordinates[1] > map_bounds_south && points_json.features[i].geometry.coordinates[0] < map_bounds_east && points_json.features[i].geometry.coordinates[0] > map_bounds_west)) {
-							//console.log(points_json.features[i]);
 							plot_data.push({x: points_json.features[i].properties.CASES, y: points_json.features[i].properties.DEATHS})
 							}
 						}
-					console.log(plot_data)
 
+					scatterChartData.datasets.forEach(function(dataset) {
+						dataset.data = plot_data
+					});
+					scatter_plot.update({
+						duration: 0
+					});
+					
+					/*
 					var ctx = chartCanvas.getContext('2d');
+					
 					var config = {
 					   type: 'scatter',
 					   data: {
-					      //labels: labels,
 					      datasets: [{
 					         label: 'Disease Mortality',
 					         data: plot_data,
@@ -83,9 +119,9 @@ $.when(points).done(function(){
 					   }
 					};
 					var chart = new Chart(ctx, config);
-
+	*/
 					}, delayInMilliseconds);
-
+				
 
 		});
 
