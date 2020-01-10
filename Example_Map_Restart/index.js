@@ -9,13 +9,15 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 }).addTo(main_map);
 
 //define function to update chart data
-function addData(chart, label, data) {
+/*function addData(chart, label, data) {
     chart.data.labels.push(label);
     chart.data.datasets.forEach((dataset) => {
         dataset.data.push(data);
     });
     chart.update();
 }
+*/
+
 
 var pointMarkerOptions = {
     radius: 2,
@@ -36,7 +38,7 @@ $.when(points).done(function(){
 	var points_json = points.responseJSON
 	
 	//load json point data into the map
-	L.geoJson(points_json, {
+	var mapped_points = L.geoJson(points_json, {
 		//style point data using pointMarkerOptions
 		pointToLayer: function(feature, latlng) {
 			return L.circleMarker(latlng, pointMarkerOptions);
@@ -58,10 +60,29 @@ $.when(points).done(function(){
 		}]
 	};
 
-	console.log(init_data)
+	//options for styling the chart
+	var chartOptions = {
+		scales: {
+	        xAxes: [{
+	            scaleLabel: {
+	              	display: true,
+   	              	labelString: 'Infection Rate'
+	      		}
+	      	}],
+		    yAxes: [{
+		    	scaleLabel: {
+         		display: true,
+	            labelString: 'Cases'
+        		}
+	      }]
+	  },
+	  onHover: handleChartHover
+	}
+	
 	var config = {
 	   type: 'scatter',
-	   data: scatterChartData
+	   data: scatterChartData,
+	   options: chartOptions
 	};
 
 	var scatter_plot = new Chart(ctx, config);
@@ -105,27 +126,41 @@ $.when(points).done(function(){
 						duration: 0
 					});
 					
-					/*
-					var ctx = chartCanvas.getContext('2d');
-					
-					var config = {
-					   type: 'scatter',
-					   data: {
-					      datasets: [{
-					         label: 'Disease Mortality',
-					         data: plot_data,
-					         backgroundColor: 'rgba(0, 119, 204, 0.3)'
-					      }]
-					   }
-					};
-					var chart = new Chart(ctx, config);
-	*/
 					}, delayInMilliseconds);
 				
 
 		});
 
+	function handleChartHover(e){
+		var chartHoverData = scatter_plot.getElementsAtEvent(e)
+		//console.log(chartHoverData[0]._view.x)
+		if (chartHoverData.length != 0) {
+			var hoveredXValue = chartHoverData[0]._view.x;
+			var hoveredYVlaue = chartHoverData[0]._view.y;
+			console.log(hoveredXValue)
+			mapped_points.eachLayer(function (layer) {
+				//console.log(layer.feature.properties.CASES)
+				if (layer.feature.properties.CASES == hoveredXValue && layer.feature.properties.DEATHS == hoveredYVlaue) {
+					console.log(layer.feature)
+				}
+			})
+
+		};
+		//console.log(chartHoverData.length)
+		//var hoveredXValue = 
+		//var hoveredYValue = 
+		/*
+		geoJsonLayer.eachLayer(function(layer) {
+  			layer.bindPopup(layer.feature.properties.name);
+		});
+		*/
+		//get the point in 
+
+		//continue here to highlight any point hovered over in the plot
+	}
+
 })
+
 
 //add in a 1000 ms delay to prevent updating the chart too much
 
