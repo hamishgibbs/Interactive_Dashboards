@@ -1,6 +1,7 @@
+//initialize the map
 var main_map = L.map('main_map').setView([-19.196521, 29.925063], 7);
 
-  //load a tile layer
+//load a tile layer
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA', {
   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
   maxZoom: 18,
@@ -36,7 +37,7 @@ $.when(points).done(function(){
 	
 	//define variable containing json point data
 	var points_json = points.responseJSON
-	
+	console.log(points_json)
 	//load json point data into the map
 	var mapped_points = L.geoJson(points_json, {
 		//style point data using pointMarkerOptions
@@ -85,6 +86,7 @@ $.when(points).done(function(){
 	   options: chartOptions
 	};
 
+//create the new chart
 	var scatter_plot = new Chart(ctx, config);
 
 	//define the number of ms to wait before executing code - this is not working currently (may be slowing things down)
@@ -93,43 +95,44 @@ $.when(points).done(function(){
 	//when the main map is zoomed or moved
 	main_map.on('zoom move', function() {
 
-			//this is changing every little move of the map 			
-			var map_bounds = main_map.getBounds();
-			
-			//this timeout doesnt seem to be doing anything
-			setTimeout(function() {
+		//this is changing every little move of the map 			
+		var map_bounds = main_map.getBounds();
+		console.log(map_bounds)
+		
+		//this timeout doesnt seem to be doing anything
+		setTimeout(function() {
 
-					//define varibales to hold the N, S, E, W extents of the map
-					var map_bounds_north = map_bounds._northEast.lat
-					var map_bounds_east = map_bounds._northEast.lng
-					var map_bounds_south = map_bounds._southWest.lat
-					var map_bounds_west = map_bounds._southWest.lng
+				//define varibales to hold the N, S, E, W extents of the map
+				var map_bounds_north = map_bounds._northEast.lat
+				var map_bounds_east = map_bounds._northEast.lng
+				var map_bounds_south = map_bounds._southWest.lat
+				var map_bounds_west = map_bounds._southWest.lng
 
-					//filter chart data for only points within the map bounds
-					var plot_data = [];
+				//filter chart data for only points within the map bounds
+				var plot_data = [];
 
-					//for every feature in the JSON point data
-					for(var i in points_json.features) {
-						//console.log(points_json.features[i].geometry.coordinates)
-						//if latitude is less than map_bounds_north AND latitude is more
-						// than map_bounds_south AND longitude is less than
-						// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
-						if ((points_json.features[i].geometry.coordinates[1] < map_bounds_north && points_json.features[i].geometry.coordinates[1] > map_bounds_south && points_json.features[i].geometry.coordinates[0] < map_bounds_east && points_json.features[i].geometry.coordinates[0] > map_bounds_west)) {
-							plot_data.push({x: points_json.features[i].properties.CASES, y: points_json.features[i].properties.DEATHS})
-							}
+				//for every feature in the JSON point data
+				for(var i in points_json.features) {
+					//console.log(points_json.features[i].geometry.coordinates)
+					//if latitude is less than map_bounds_north AND latitude is more
+					// than map_bounds_south AND longitude is less than
+					// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
+					if ((points_json.features[i].geometry.coordinates[1] < map_bounds_north && points_json.features[i].geometry.coordinates[1] > map_bounds_south && points_json.features[i].geometry.coordinates[0] < map_bounds_east && points_json.features[i].geometry.coordinates[0] > map_bounds_west)) {
+						plot_data.push({x: points_json.features[i].properties.CASES, y: points_json.features[i].properties.DEATHS})
 						}
+					}
 
-					scatterChartData.datasets.forEach(function(dataset) {
-						dataset.data = plot_data
-					});
-					scatter_plot.update({
-						duration: 0
-					});
-					
-					}, delayInMilliseconds);
+				scatterChartData.datasets.forEach(function(dataset) {
+					dataset.data = plot_data
+				});
+				scatter_plot.update({
+					duration: 0
+				});
 				
+				}, delayInMilliseconds);
+			
 
-		});
+	});
 
 	function handleChartHover(e){
 		var chartHoverData = scatter_plot.getElementsAtEvent(e)
