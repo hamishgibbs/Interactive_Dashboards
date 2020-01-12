@@ -98,7 +98,8 @@ $.when(points).done(function(){
         		}
 	      }]
 	  },
-	  onHover: highlightPointOnHover
+	  onHover: highlightPointOnHover,
+	  onClick: zoomToClickedPoint
 	}
 
 	function highlightPointOnHover(e){
@@ -121,12 +122,34 @@ $.when(points).done(function(){
 			}
 		}else{
 			for (var i in mapped_points._layers){
+				//reset style of all points
 				mapped_points._layers[i].setStyle(pointMarkerOptions);
 			}
 		}	
-
-		//reset style of all points
 	}
+
+	function zoomToClickedPoint(e){
+		var chartClickData = scatter_plot.getElementsAtEvent(e)
+		
+
+		var clickFeatureId = chartClickData.map(function (datum) {
+	  		return scatter_plot.data.datasets[0].data[datum._index].id;
+		});
+
+		if (clickFeatureId.length != 0){
+			for (var i in mapped_points._layers){
+				if(mapped_points._layers[i].feature.properties.id == clickFeatureId){
+					zoomToOnClickX = mapped_points._layers[i].feature.geometry.coordinates[0]
+					zoomToOnClickY = mapped_points._layers[i].feature.geometry.coordinates[1]
+					
+					main_map.setView([zoomToOnClickY, zoomToOnClickX], 10)
+
+				}
+			}
+		}
+	}
+
+
 	
 	var config = {
 	   type: 'scatter',
@@ -134,7 +157,7 @@ $.when(points).done(function(){
 	   options: chartOptions
 	};
 
-//create the new chart
+	//create the new chart
 	var scatter_plot = new Chart(ctx, config);
 
 	//define the number of ms to wait before executing code - this is not working currently (may be slowing things down)
@@ -187,7 +210,7 @@ $.when(points).done(function(){
 //area selection
 //hide chart
 //different chart types
-//main map on left, multiple charts right in bar, with area selector - adjust data of all charts 
+//main map on left, multiple types of charts right (in bar), with area selector - adjust data of all charts 
 
 //overall goal:
 //simplify each operation into a function
