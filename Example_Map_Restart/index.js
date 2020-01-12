@@ -1,3 +1,10 @@
+//rework a number of items in this project to functions 
+//allow for lots of mapping operations to be completed from the package
+//this will require reworking of the workflow of making a map
+//do this carefully
+
+//also focus on css - stored in another file
+
 //initialize the map
 var main_map = L.map('main_map').setView([-19.196521, 29.925063], 7);
 
@@ -19,7 +26,6 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 }
 */
 
-
 var pointMarkerOptions = {
     radius: 2,
     fillColor: "#000000",
@@ -37,7 +43,7 @@ $.when(points).done(function(){
 	
 	//define variable containing json point data
 	var points_json = points.responseJSON
-	console.log(points_json)
+
 	//load json point data into the map
 	var mapped_points = L.geoJson(points_json, {
 		//style point data using pointMarkerOptions
@@ -67,13 +73,13 @@ $.when(points).done(function(){
 	        xAxes: [{
 	            scaleLabel: {
 	              	display: true,
-   	              	labelString: 'Infection Rate'
+   	              	labelString: 'Cases'
 	      		}
 	      	}],
 		    yAxes: [{
 		    	scaleLabel: {
          		display: true,
-	            labelString: 'Cases'
+	            labelString: 'Deaths'
         		}
 	      }]
 	  },
@@ -97,7 +103,6 @@ $.when(points).done(function(){
 
 		//this is changing every little move of the map 			
 		var map_bounds = main_map.getBounds();
-		console.log(map_bounds)
 		
 		//this timeout doesnt seem to be doing anything
 		setTimeout(function() {
@@ -113,7 +118,6 @@ $.when(points).done(function(){
 
 				//for every feature in the JSON point data
 				for(var i in points_json.features) {
-					//console.log(points_json.features[i].geometry.coordinates)
 					//if latitude is less than map_bounds_north AND latitude is more
 					// than map_bounds_south AND longitude is less than
 					// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
@@ -134,19 +138,37 @@ $.when(points).done(function(){
 
 	});
 
+	//rework example data - add an id field, generate data from normal distributions
+
 	function handleChartHover(e){
 		var chartHoverData = scatter_plot.getElementsAtEvent(e)
-		//console.log(chartHoverData[0]._view.x)
+
+		//return x value of the hovered feature
+		var hoverFeatureIds = chartHoverData.map(function (datum) {
+      		return scatter_plot.data.datasets[0].data[datum._index].x;
+    	});
+    	console.log(hoverFeatureIds)
+    	//console.log(points_json)
+/*
 		if (chartHoverData.length != 0) {
-			var hoveredXValue = chartHoverData[0]._view.x;
-			var hoveredYVlaue = chartHoverData[0]._view.y;
-			console.log(hoveredXValue)
+			//if working on closest value 
+			//(which doesn't have the issue of precision, then remove the rounding)
+
+			var hoveredXValue = Math.round(chartHoverData[0]._view.x * 100) / 100;
+			var hoveredYValue = Math.round(chartHoverData[0]._view.y * 100) / 100;
+			
+			var scatterXValues = [];
+			var scatterYValues = [];
+
 			mapped_points.eachLayer(function (layer) {
-				//console.log(layer.feature.properties.CASES)
-				if (layer.feature.properties.CASES == hoveredXValue && layer.feature.properties.DEATHS == hoveredYVlaue) {
-					console.log(layer.feature)
-				}
+				scatterXValues.push(Math.round(layer.feature.properties.DEATHS * 100) / 100);
+				scatterYValues.push(Math.round(layer.feature.properties.CASES * 100) / 100);
 			})
+
+			console.log(chartHoverData[0])
+			//console.log(hoveredYValue, scatterYValues)
+			//console.log(getClosestValueInArray(hoveredYValue, scatterYValues))
+
 
 		};
 		//console.log(chartHoverData.length)
