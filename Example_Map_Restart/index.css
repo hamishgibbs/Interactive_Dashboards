@@ -1,0 +1,20 @@
+/* style main map */
+
+#main_map{
+  height: 100%
+}
+
+/* style chart container */
+.chart-container {
+  height: 300px;
+  width: 600px;
+}
+
+#info-pane {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 400;
+  padding: 1em;
+  background: white;
+}

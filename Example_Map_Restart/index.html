@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
    crossorigin=""/>
+
+  <!-- lint to custom stylesheet for this webpage -->
+  <link rel="stylesheet" type="text/css" href="index.css">
   
   <!-- link to Leaflet.js through Content Delivery Network -->
   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
@@ -16,35 +19,16 @@
   <!-- link to jquery.js file for importing .geojson data -->
   <script src="jquery-3.4.1.min.js"></script>
   
+  <!-- import js package for interactive dashboard funcitons -->
   <script type="text/javascript" src="InteractiveDashboardPackage.js"></script>
 
   <!-- link to chart.js through Content Delivery Network -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
   
-  <!-- Style map height -->
-  <style type="text/css">
-    #main_map{ height: 100% }
-  </style>
 </head>
+
 <!-- Website Content -->
 <body>
-
-  <!-- Style absolute panel holding chart -->
-  <style>
-    .chart-container {
-      height: 300px;
-      width: 600px;
-    }
-
-    #info-pane {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 400;
-      padding: 1em;
-      background: white;
-    }
-    </style>
 
   <!-- <div> holding map -->
   <div id="main_map"></div>
@@ -54,7 +38,10 @@
     <!-- this is making a javascrip variable named chartCanvas that is accessible in the .js file -->
     <canvas id="chartCanvas"></canvas>
   </div>
+
     <!-- import javascript from separate file -->
   <script src="index.js"></script>
+
 </body>
+
 </html>

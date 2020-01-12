@@ -18,9 +18,12 @@ for(i in 1:length(z)){
 plot(z)
 plot(all_points, add=T)
 
-points = SpatialPointsDataFrame(all_points, data=data.frame('CASES'=runif(length(all_points), 100, 1000),
-                                                            'DEATHS'=runif(length(all_points), 2, 10),
-                                                            'INFECTION_RATE'=runif(length(all_points))))
+points = SpatialPointsDataFrame(all_points, data=data.frame('id'=1:length(all_points),
+                                                            'CASES'=rnorm(length(all_points), 100, 20),
+                                                            'DEATHS'=rnorm(length(all_points), 2, 1),
+                                                            'INFECTION_RATE'=rnorm(length(all_points))))
+
+plot(points@data$CASES, points@data$DEATHS)
 
 classes = classIntervals(as.numeric(points$CASES), n = 10, style = 'kmeans')
 
@@ -30,14 +33,5 @@ for(i in seq_along(points$CASES)){
   points$CASES_COUNT_CLASS[i] = findInterval(points$CASES[i], classes$brks)
 }
 
-shapefile(points, '/Users/hamishgibbs/Documents/LSHTM/Interactive_Dashboard_Data/Z_Points.shp')
+shapefile(points, '/Users/hamishgibbs/Documents/LSHTM/Interactive_Dashboard_Data/Z_Points.shp', overwrite=T)
 
-points@data
-
-geojson_write(points, file='H:/Projects/Interactive_Dashboards/Javascript_HTML/Example_Map/Zimbabwe_Synthetic_Data.geojson')
-
-as.geojson(points)
-
-writeOGR(as.geojson(points), "H:/Projects/Interactive_Dashboards/Javascript_HTML/Example_Map", layer="Zimbabwe_Synthetic_Data.geojson", driver="GeoJSON")
-
-points@coords

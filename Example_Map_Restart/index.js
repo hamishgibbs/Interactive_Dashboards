@@ -16,23 +16,34 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: 'pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA'
 }).addTo(main_map);
 
-//define function to update chart data
-/*function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
-    chart.update();
-}
-*/
-
+//style of standard point symbols
 var pointMarkerOptions = {
-    radius: 2,
+    radius: 3,
     fillColor: "#000000",
     color: "#000",
     weight: 1,
     opacity: 1,
     fillOpacity: 1
+};
+
+//style of highlighted point symbols
+var highlightedMarkerOptions = {
+    radius: 6,
+    fillColor: "#FF2D00",
+    color: "#FF2D00",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 1
+};
+
+//style of muted point symbols
+var mutedMarkerOptions = {
+    radius: 3,
+    fillColor: "#000000",
+    color: "#000",
+    weight: 1,
+    opacity: 0.2,
+    fillOpacity: 0.2
 };
 
 //get json from file
@@ -44,11 +55,15 @@ $.when(points).done(function(){
 	//define variable containing json point data
 	var points_json = points.responseJSON
 
+	all_markers = [];
+
 	//load json point data into the map
 	var mapped_points = L.geoJson(points_json, {
 		//style point data using pointMarkerOptions
 		pointToLayer: function(feature, latlng) {
-			return L.circleMarker(latlng, pointMarkerOptions);
+			var marker = L.circleMarker(latlng, pointMarkerOptions);
+			all_markers.push(marker)
+			return marker;
 		}
 	}).addTo(main_map);
 
@@ -57,12 +72,12 @@ $.when(points).done(function(){
 	var ctx = chartCanvas.getContext('2d');
 	
 	var init_data = points_json.features.map(function(e) {
-		return {x: e.properties.CASES, y: e.properties.DEATHS}
+		return {x: e.properties.CASES, y: e.properties.DEATHS, id: e.properties.id}
 	});
 
 	var scatterChartData = {
 		datasets: [{
-			label: 'Scatter Plot Data',
+			label: 'Disease Mortality',
 			data: init_data
 		}]
 	};
@@ -83,7 +98,34 @@ $.when(points).done(function(){
         		}
 	      }]
 	  },
-	  onHover: handleChartHover
+	  onHover: highlightPointOnHover
+	}
+
+	function highlightPointOnHover(e){
+		var chartHoverData = scatter_plot.getElementsAtEvent(e)
+
+		//return id value of the hovered feature
+		var hoverFeatureIds = chartHoverData.map(function (datum) {
+	  		return scatter_plot.data.datasets[0].data[datum._index].id;
+		});
+		
+		if (hoverFeatureIds.length != 0){
+			for (var i in mapped_points._layers){
+				if(mapped_points._layers[i].feature.properties.id == hoverFeatureIds){
+					//style leaflet marker (opacity 0, )
+					mapped_points._layers[i].setStyle(highlightedMarkerOptions);
+				}else{
+					mapped_points._layers[i].setStyle(mutedMarkerOptions);
+					//make marker opaque
+				}
+			}
+		}else{
+			for (var i in mapped_points._layers){
+				mapped_points._layers[i].setStyle(pointMarkerOptions);
+			}
+		}	
+
+		//reset style of all points
 	}
 	
 	var config = {
@@ -96,7 +138,6 @@ $.when(points).done(function(){
 	var scatter_plot = new Chart(ctx, config);
 
 	//define the number of ms to wait before executing code - this is not working currently (may be slowing things down)
-	var delayInMilliseconds = 100;
 
 	//when the main map is zoomed or moved
 	main_map.on('zoom move', function() {
@@ -104,149 +145,53 @@ $.when(points).done(function(){
 		//this is changing every little move of the map 			
 		var map_bounds = main_map.getBounds();
 		
-		//this timeout doesnt seem to be doing anything
-		setTimeout(function() {
+		//define variables to hold the N, S, E, W extents of the map
+		var map_bounds_north = map_bounds._northEast.lat
+		var map_bounds_east = map_bounds._northEast.lng
+		var map_bounds_south = map_bounds._southWest.lat
+		var map_bounds_west = map_bounds._southWest.lng
 
-				//define varibales to hold the N, S, E, W extents of the map
-				var map_bounds_north = map_bounds._northEast.lat
-				var map_bounds_east = map_bounds._northEast.lng
-				var map_bounds_south = map_bounds._southWest.lat
-				var map_bounds_west = map_bounds._southWest.lng
+		//filter chart data for only points within the map bounds
+		var plot_data = [];
 
-				//filter chart data for only points within the map bounds
-				var plot_data = [];
+		//for every feature in the JSON point data
+		for(var i in points_json.features) {
 
-				//for every feature in the JSON point data
-				for(var i in points_json.features) {
-					//if latitude is less than map_bounds_north AND latitude is more
-					// than map_bounds_south AND longitude is less than
-					// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
-					if ((points_json.features[i].geometry.coordinates[1] < map_bounds_north && points_json.features[i].geometry.coordinates[1] > map_bounds_south && points_json.features[i].geometry.coordinates[0] < map_bounds_east && points_json.features[i].geometry.coordinates[0] > map_bounds_west)) {
-						plot_data.push({x: points_json.features[i].properties.CASES, y: points_json.features[i].properties.DEATHS})
-						}
-					}
+			//if latitude is less than map_bounds_north AND latitude is more
+			// than map_bounds_south AND longitude is less than
+			// map_bounds_east AND longitude is more than map_bounds_west (ie- it is within view):
+			if ((points_json.features[i].geometry.coordinates[1] < map_bounds_north && points_json.features[i].geometry.coordinates[1] > map_bounds_south && points_json.features[i].geometry.coordinates[0] < map_bounds_east && points_json.features[i].geometry.coordinates[0] > map_bounds_west)) {
+				plot_data.push({x: points_json.features[i].properties.CASES, y: points_json.features[i].properties.DEATHS, id: points_json.features[i].properties.id})
+				}
+			}
 
-				scatterChartData.datasets.forEach(function(dataset) {
-					dataset.data = plot_data
-				});
-				scatter_plot.update({
-					duration: 0
-				});
-				
-				}, delayInMilliseconds);
-			
-
-	});
-
-	//rework example data - add an id field, generate data from normal distributions
-
-	function handleChartHover(e){
-		var chartHoverData = scatter_plot.getElementsAtEvent(e)
-
-		//return x value of the hovered feature
-		var hoverFeatureIds = chartHoverData.map(function (datum) {
-      		return scatter_plot.data.datasets[0].data[datum._index].x;
-    	});
-    	console.log(hoverFeatureIds)
-    	//console.log(points_json)
-/*
-		if (chartHoverData.length != 0) {
-			//if working on closest value 
-			//(which doesn't have the issue of precision, then remove the rounding)
-
-			var hoveredXValue = Math.round(chartHoverData[0]._view.x * 100) / 100;
-			var hoveredYValue = Math.round(chartHoverData[0]._view.y * 100) / 100;
-			
-			var scatterXValues = [];
-			var scatterYValues = [];
-
-			mapped_points.eachLayer(function (layer) {
-				scatterXValues.push(Math.round(layer.feature.properties.DEATHS * 100) / 100);
-				scatterYValues.push(Math.round(layer.feature.properties.CASES * 100) / 100);
-			})
-
-			console.log(chartHoverData[0])
-			//console.log(hoveredYValue, scatterYValues)
-			//console.log(getClosestValueInArray(hoveredYValue, scatterYValues))
-
-
-		};
-		//console.log(chartHoverData.length)
-		//var hoveredXValue = 
-		//var hoveredYValue = 
-		/*
-		geoJsonLayer.eachLayer(function(layer) {
-  			layer.bindPopup(layer.feature.properties.name);
+		scatterChartData.datasets.forEach(function(dataset) {
+			dataset.data = plot_data
 		});
-		*/
-		//get the point in 
 
-		//continue here to highlight any point hovered over in the plot
-	}
+		scatter_plot.update({
+			//prevent animations on update
+			duration: 0
+		});
+		
+	});
+	
+	//highlightPointOnHover(main_map.on('zoom move'))
+
 
 })
 
+//feature ideas:
 
-//add in a 1000 ms delay to prevent updating the chart too much
+//on click - zoom t 1km x 1km of point feature
+//area selection
+//hide chart
+//different chart types
+//main map on left, multiple charts right in bar, with area selector - adjust data of all charts 
 
+//overall goal:
+//simplify each operation into a function
+//make it easy to do many standard interactive dashboard tasks:
+//i.e. HilightOnHover(map, chart)
 
-/*
-//try adding rodent point data
-//this file was imported into QGIS - retry method in R GEOJSON MUST BE IN THE CORRECT FORMAT FOR IMPORT
-var points = $.getJSON("Z_Points.geojson",function(data){
-  // add GeoJSON layer to the map once the file is loaded
-  L.geoJson(data, {
-  	pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, pointMarkerOptions);
-    }
-  }).addTo(main_map);
-});
-
-//when point data has been loaded
-$.when(points).done(function(){
-
-	//get data for labels - navigate json points (response object), responseJSON (json object), features (array)
-	//for every feature in features - return the proprties.X (data dalue for eahc feature) 
-	//var labels = points.responseJSON.features.map(function(e) {
-	//   return e.properties.pwd_district;
-	//});
-	//repeat for data - how to make this a 2d array?
-
-	var data = points.responseJSON.features.map(function(e) {
-		return {x: e.properties.CASES, y: e.properties.DEATHS}
-	});;
-
-	//console.log(data)
-
-	var ctx = chartCanvas.getContext('2d');
-	var config = {
-	   type: 'scatter',
-	   data: {
-	      //labels: labels,
-	      datasets: [{
-	         label: 'Graph Line',
-	         data: data,
-	         backgroundColor: 'rgba(0, 119, 204, 0.3)'
-	      }]
-	   }
-	};
-
-	//update the chartCanvas variable in the .html document with the data
-	var chart = new Chart(ctx, config);
-
-	//console.log(contained)
-
-
-
-});
-
-
-
-//now move on to saving synthetic zimbabwe data in the proper geojson format
-
-//then how to plot data reliably (scatter plot, bar chart etc)
-
-//then how to change the plot for every visible (or selected) feature
-
-//then how to change map from plot
-*/
+//read about double execution https://blog.rodneyrehm.de/archives/20-Preventing-Duplicate-Execution.html
