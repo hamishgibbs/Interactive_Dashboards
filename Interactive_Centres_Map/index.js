@@ -31,13 +31,17 @@ $.when(points).done(function(){
 		//style point data using pointMarkerOptions
 		pointToLayer: function(feature, latlng) {
 			var marker = L.circleMarker(latlng, pointMarkerOptions);
-			console.log(marker)
-			//marker.bindPopup() // bind a popup with project short name
 			all_markers.push(marker)
 			return marker;
 		}
 	}).addTo(main_map);
 
+	// make this happen on hover
+	for (var i in mapped_points._layers){
+		mapped_points._layers[i].bindPopup(mapped_points._layers[i].feature.properties.SHORT_N)
+	}
+
+	//click and show/hide info panel
 
 });
 
