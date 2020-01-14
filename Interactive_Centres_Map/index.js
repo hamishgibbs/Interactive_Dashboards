@@ -11,8 +11,8 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 //style of map point symbols
 var pointMarkerOptions = {
     radius: 5,
-    fillColor: "#FF2D00",
-    color: "#FF2D00",
+    fillColor: "#00A7FF",
+    color: "#00A7FF",
     weight: 1,
     opacity: 1,
     fillOpacity: 0.5
@@ -82,15 +82,15 @@ function onMarkerClick(e){
 	var info_elements = [project_title, project_overall_pi, project_author, project_blurb, project_start_date, project_end_date, project_funder]
 
 	//format data into html (omit missing items)
-	var project_title_HTML = "<div><h2>" + project_title + "</h2></div>"
-	var project_overall_pi_HTML = "<div><h4>" + project_overall_pi + "</h4></div>"
-	var project_author_HTML = "<div><h4>" + project_author + "</h4></div>"
-	var project_blurb_HTML = "<div><p>" + project_blurb + "</p></div>"
+	var project_title_HTML = '<h2 style="text-align: center;">' + project_title + "</h2>"
+	var project_overall_pi_HTML = "<h4>" + project_overall_pi + "</h4>"
+	var project_author_HTML = "<h4>" + project_author + "</h4>"
+	var project_blurb_HTML = "<p>" + project_blurb + "</p>"
 	
 	//handle this datetime format to make more natural
-	var project_start_date_HTML = "<div><p>" + project_start_date + "</p></div>"
-	var project_end_date_HTML = "<div><p>" + project_end_date + "</p></div>"
-	var project_funder_HTML = "<div><p>" + project_funder + "</p></div>"
+	var project_start_date_HTML = "<p>" + project_start_date + "</p>"
+	var project_end_date_HTML = "<p>" + project_end_date + "</p>"
+	var project_funder_HTML = "<p>" + project_funder + "</p>"
 
 	var html_elements = [project_title_HTML, project_overall_pi_HTML, project_author_HTML, project_blurb_HTML, project_start_date_HTML, project_end_date_HTML, project_funder_HTML]
 
@@ -107,16 +107,20 @@ function onMarkerClick(e){
 	}
 
 	info_panel_text = html_elements.join("")
+	info_panel_text = "<div>" + info_panel_text + "</div>"
 
 	//create a new control with project data
 	L.Control.textbox = L.Control.extend({
 		onAdd: function(map) {
 			var text = L.DomUtil.create('div', 'textbox-interior');
+			console.log(text)
+			text.style.opacity = '1';
 			text.style.backgroundColor='white';
 			text.style.padding= '10px';
-			text.style.height = '500px';
-			text.style.width = '100px';
-			text.id = "info_text";
+			text.style.height = 'auto';
+			text.style.width = '150px';
+			text.style.outlintColor = "green";
+			text.id = "info_text"
 			//add text to textbox
 			text.innerHTML = info_panel_text;
 			return text; 
@@ -139,6 +143,10 @@ function onMarkerClick(e){
 	
 }
 
+
 //change popup styling, map marker styling, panel styling & width
 
 //add everything to a single HTML document
+
+//also write a direct workflow from csv to github upload
+//or from ODK to csv to github upload to read
