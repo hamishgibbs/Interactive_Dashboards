@@ -1,15 +1,11 @@
+/*define size of map*/
 #main_map{	
     height: 600px;
   	width: 600px;
  }
 
+/*define size of map container*/
 .main_map_container{
 	position: relative;
     width: 600px;
 }
-
-#info_text{
-	background-color: #000000;
-}
-
-/*add changes to text box here?*/
