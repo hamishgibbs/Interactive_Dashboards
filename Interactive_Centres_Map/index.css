@@ -1,11 +1,11 @@
 #main_map{	
-    height: 1000px;
-  	width: 1000px;
+    height: 600px;
+  	width: 600px;
  }
 
 .main_map_container{
 	position: relative;
-    width: 1000px;
+    width: 600px;
 }
 
 #info_text{
