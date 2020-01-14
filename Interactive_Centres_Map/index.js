@@ -1,4 +1,4 @@
-var main_map = L.map('main_map').setView([-19.196521, 29.925063], 7);
+var main_map = L.map('main_map').setView([-16.970303, 32.079454], 2);
 
 //load a tile layer
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA', {
@@ -8,6 +8,38 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: 'pk.eyJ1IjoiaGdpYmJzIiwiYSI6ImNrNTNvOHViNzA1YWgzbnFrOTU0NTF5aHcifQ.EOtqyLac7FOrZ-Ae2f4_EA'
 }).addTo(main_map);
 
+//style of map point symbols
+var pointMarkerOptions = {
+    radius: 5,
+    fillColor: "#FF2D00",
+    color: "#FF2D00",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.5
+};
+
+//get json from file
+var points = $.getJSON("https://raw.githubusercontent.com/hamishgibbs/Interactive_Dashboard_Public_Data/master/Centre_Points.geojson")
+
+$.when(points).done(function(){
+	var points_json = points.responseJSON
+
+	all_markers = [];
+
+	//load json point data into the map
+	var mapped_points = L.geoJson(points_json, {
+		//style point data using pointMarkerOptions
+		pointToLayer: function(feature, latlng) {
+			var marker = L.circleMarker(latlng, pointMarkerOptions);
+			console.log(marker)
+			//marker.bindPopup() // bind a popup with project short name
+			all_markers.push(marker)
+			return marker;
+		}
+	}).addTo(main_map);
+
+
+});
 
 //wrap in reactive context on marker click
 //get these values from the geojson file
@@ -33,8 +65,6 @@ L.Control.textbox = L.Control.extend({
 	}
 });
 
-
-
 L.control.textbox = function(opts) {return new L.Control.textbox(opts);}
 var info_pane = L.control.textbox({ position: 'topright' }).addTo(main_map)
 
@@ -43,6 +73,8 @@ console.log(info_pane)
 setTimeout(function(){ info_pane.remove() }, 1000);
 
 //make geojson point file R, QGIS, host on github - call here - update textbox on marker click if click not on point, close textbox 
+
+//https://raw.githubusercontent.com/hamishgibbs/Interactive_Dashboard_Public_Data/master/Centre_Points.geojson
 
 //Update text in the textbox: Using jquery, $("#info_text")[0].innerHTML = 'new text' 
 
