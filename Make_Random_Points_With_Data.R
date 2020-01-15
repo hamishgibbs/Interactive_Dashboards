@@ -35,3 +35,5 @@ for(i in seq_along(points$CASES)){
 
 shapefile(points, '/Users/hamishgibbs/Documents/LSHTM/Interactive_Dashboard_Data/Z_Points.shp', overwrite=T)
 
+points$INFECTION_RATE
+
